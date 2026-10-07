@@ -23,31 +23,51 @@
 #' @author Alban Sagouis
 #' @export
 
+fakeTextFile <- function(
+  file_extension = '.R',
+  dir_path = NULL,
+  file_path = NULL,
+  txt = NULL,
+  n_lines = 1
+) {
+  assertthat::assert_that(assertthat::is.string(file_extension))
+  assertthat::assert_that(assertthat::is.number(n_lines))
+  assertthat::assert_that(n_lines > 0)
 
-fakeTextFile <- function(file_extension = '.R', dir_path = NULL, file_path = NULL, txt = NULL, n_lines = 1) {
-   assertthat::assert_that(assertthat::is.string(file_extension))
-   assertthat::assert_that(assertthat::is.number(n_lines))
-   assertthat::assert_that(n_lines > 0)
+  if (is.null(txt)) {
+    if (n_lines == 1) {
+      txt <- paste(
+        sample(c(rep(" ", 10), letters), 100, replace = TRUE),
+        collapse = ""
+      )
+    } else {
+      txt <- lapply(1:n_lines, function(x) {
+        paste(
+          sample(c(rep(" ", 10), letters), 100, replace = TRUE),
+          collapse = ""
+        )
+      })
+    }
+  } else {
+    if (is.list(txt)) {
+      lapply(txt, function(line) {
+        assertthat::assert_that(assertthat::is.string(line))
+      })
+    } else {
+      assertthat::assert_that(assertthat::is.string(txt))
+    }
+  }
 
-   if(is.null(txt)) {
-      if(n_lines == 1) {
-         txt <- paste(sample(c(rep(" ", 10), letters), 100, replace = TRUE), collapse = "")
-      } else {
-         txt <- lapply(1:n_lines, function(x) paste(sample(c(rep(" ", 10), letters), 100, replace = TRUE), collapse = ""))
-      }
-   } else {
-      if(is.list(txt)) lapply(txt, function(line) assertthat::assert_that(assertthat::is.string(line))) else assertthat::assert_that(assertthat::is.string(txt))
-   }
+  if (is.null(dir_path) & is.null(file_path)) {
+    tmp_path <- tempfile(fileext = file_extension)
+  } else if (!is.null(dir_path) & is.null(file_path)) {
+    assertthat::assert_that(assertthat::is.writeable(dir_path))
+    tmp_path <- tempfile(fileext = file_extension, tmpdir = dir_path)
+  } else {
+    tmp_path <- file_path
+  }
 
-   if(is.null(dir_path) & is.null(file_path)) {
-      tmp_path <- tempfile(fileext = file_extension)
-   } else if(!is.null(dir_path) &  is.null(file_path)) {
-      assertthat::assert_that(assertthat::is.writeable(dir_path))
-      tmp_path <- tempfile(fileext = file_extension, tmpdir = dir_path)
-   } else tmp_path <- file_path
+  cat(unlist(txt), file = tmp_path, fill = TRUE) # , sep = '\n'
 
-   cat(unlist(txt), file = tmp_path, fill = TRUE)   # , sep = '\n'
-
-   return(list(tmp_path = tmp_path, txt = txt))
+  return(list(tmp_path = tmp_path, txt = txt))
 }
-

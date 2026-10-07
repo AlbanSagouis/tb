@@ -7,5 +7,5 @@
 #' @export
 
 normalisePath <- function(fullPath) {
-   gsub(pattern = '\\', replacement = '/', x = fullPath, fixed = TRUE)
+  gsub(pattern = '\\', replacement = '/', x = fullPath, fixed = TRUE)
 }

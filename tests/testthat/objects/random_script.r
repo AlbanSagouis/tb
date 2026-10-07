@@ -16,10 +16,6 @@ dataset_id <- 'random_2020'
 
 dat <- data.frame(dataset_id = rep(dataset_id, 10))
 
-
-
 # dir.create(paste0('data/wrangled data/', dataset_id), showWarnings = FALSE)
 # write.csv(dat, paste0('data/wrangled data/', dataset_id, "/", dataset_id, '.csv'),
 #           row.names=FALSE)
-
-

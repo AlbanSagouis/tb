@@ -14,51 +14,55 @@ regmatches_ <- function(x, pat, drop = FALSE, ...) UseMethod("regmatches_")
 #' @rdname regmatches_
 #' @author Michael Wayne Kearney
 #' @export
-regmatches_first <- function(x, pat, drop = FALSE, ...) UseMethod("regmatches_first")
+regmatches_first <- function(x, pat, drop = FALSE, ...) {
+  UseMethod("regmatches_first")
+}
 
 
 #' @export
 regmatches_.default <- function(x, pat, ...) {
-   if (length(x) == 0) return(NULL)
-   stop("input must be character or list of character vectors", call. = FALSE)
+  if (length(x) == 0) {
+    return(NULL)
+  }
+  stop("input must be character or list of character vectors", call. = FALSE)
 }
 
 #' @export
 regmatches_.factor <- function(x, pat, drop = FALSE, ...) {
-   x <- as.character(x)
-   regmatches_(x, pat, drop, ...)
+  x <- as.character(x)
+  regmatches_(x, pat, drop, ...)
 }
 
 #' @export
 regmatches_.character <- function(x, pat, drop = FALSE, ...) {
-   m <- gregexpr_(x, pat, ...)
-   args <- list(x = x, m = m)
-   x <- do.call(base::regmatches, args)
-   if (drop) {
-      x <- unlist(x[lengths(x) > 0], use.names = FALSE)
-   } else {
-      x[lengths(x) == 0] <- ""
-   }
-   x
+  m <- gregexpr_(x, pat, ...)
+  args <- list(x = x, m = m)
+  x <- do.call(base::regmatches, args)
+  if (drop) {
+    x <- unlist(x[lengths(x) > 0], use.names = FALSE)
+  } else {
+    x[lengths(x) == 0] <- ""
+  }
+  x
 }
 
 
 #' @export
 regmatches_.list <- function(x, pat, drop = FALSE, ...) {
-   x <- chr2fct(x)
-   if (!all(vapply(x, is.character,
-                   FUN.VALUE = logical(1), USE.NAMES = FALSE))) {
-      stop("input must be character or list of character vectors", call. = FALSE)
-   }
-   x <- lapply(x, regmatches_, pat = pat, drop = drop, ...)
-   if (drop) {
-      x[lengths(x) == 0] <- list(character())
-   } else {
-      x[lengths(x) == 0] <- ""
-   }
-   x
+  x <- chr2fct(x)
+  if (
+    !all(vapply(x, is.character, FUN.VALUE = logical(1), USE.NAMES = FALSE))
+  ) {
+    stop("input must be character or list of character vectors", call. = FALSE)
+  }
+  x <- lapply(x, regmatches_, pat = pat, drop = drop, ...)
+  if (drop) {
+    x[lengths(x) == 0] <- list(character())
+  } else {
+    x[lengths(x) == 0] <- ""
+  }
+  x
 }
-
 
 
 #' smart gregexpr wrapper
@@ -70,87 +74,88 @@ regmatches_.list <- function(x, pat, drop = FALSE, ...) {
 #' @author Michael Wayne Kearney
 #' @export
 gregexpr_ <- function(x, pat, ...) {
-   args <- list(pattern = pat, text = x, ...)
-   if ("perl" %in% names(args)) {
-      args$perl <- args$perl
-   } else {
-      if (grepl("\\(\\?.*\\)", pat)) {
-         args$perl <- TRUE
-      } else {
-         args$perl <- FALSE
-      }
-   }
-   do.call(base::gregexpr, args)
+  args <- list(pattern = pat, text = x, ...)
+  if ("perl" %in% names(args)) {
+    args$perl <- args$perl
+  } else {
+    if (grepl("\\(\\?.*\\)", pat)) {
+      args$perl <- TRUE
+    } else {
+      args$perl <- FALSE
+    }
+  }
+  do.call(base::gregexpr, args)
 }
 
 #' @export
 regmatches_first.default <- function(x, pat, ...) {
-   stop("input must be character or list of character vectors", call. = FALSE)
+  stop("input must be character or list of character vectors", call. = FALSE)
 }
 
 #' @export
 regmatches_first.factor <- function(x, pat, drop = FALSE, ...) {
-   x <- as.character(x)
-   regmatches_first(x, pat, drop, ...)
+  x <- as.character(x)
+  regmatches_first(x, pat, drop, ...)
 }
 
 #' @export
 regmatches_first.character <- function(x, pat, drop = FALSE, ...) {
-   m <- regexpr_(x, pat, ...)
-   args <- list(x = x, m = m)
-   x[m > 0 & !is.na(m)] <- do.call(base::regmatches, args)
-   if (drop) {
-      x <- x[m > 0 & !is.na(m)]
-   } else {
-      x[m < 0 | is.na(m)] <- ""
-   }
-   x
+  m <- regexpr_(x, pat, ...)
+  args <- list(x = x, m = m)
+  x[m > 0 & !is.na(m)] <- do.call(base::regmatches, args)
+  if (drop) {
+    x <- x[m > 0 & !is.na(m)]
+  } else {
+    x[m < 0 | is.na(m)] <- ""
+  }
+  x
 }
 
 
 #' @export
 regmatches_first.list <- function(x, pat, drop = FALSE, ...) {
-   x <- chr2fct(x)
-   if (!all(vapply(x, is.character,
-                   FUN.VALUE = logical(1), USE.NAMES = FALSE))) {
-      stop("input must be character or list of character vectors", call. = FALSE)
-   }
-   x <- lapply(x, regmatches_first, pat = pat, drop = drop, ...)
-   if (drop) {
-      x[lengths(x) == 0] <- list(character())
-   } else {
-      x[lengths(x) == 0] <- ""
-   }
-   x
+  x <- chr2fct(x)
+  if (
+    !all(vapply(x, is.character, FUN.VALUE = logical(1), USE.NAMES = FALSE))
+  ) {
+    stop("input must be character or list of character vectors", call. = FALSE)
+  }
+  x <- lapply(x, regmatches_first, pat = pat, drop = drop, ...)
+  if (drop) {
+    x[lengths(x) == 0] <- list(character())
+  } else {
+    x[lengths(x) == 0] <- ""
+  }
+  x
 }
 
 #' @inheritParams gregexpr_
 #' @rdname gregexpr_
 #' @export
 regexpr_ <- function(x, pat, ...) {
-   args <- list(pattern = pat, text = x, ...)
-   if ("perl" %in% names(args)) {
-      args$perl <- args$perl
-   } else {
-      if (grepl("\\(\\?.*\\)", pat)) {
-         args$perl <- TRUE
-      } else {
-         args$perl <- FALSE
-      }
-   }
-   do.call(base::regexpr, args)
+  args <- list(pattern = pat, text = x, ...)
+  if ("perl" %in% names(args)) {
+    args$perl <- args$perl
+  } else {
+    if (grepl("\\(\\?.*\\)", pat)) {
+      args$perl <- TRUE
+    } else {
+      args$perl <- FALSE
+    }
+  }
+  do.call(base::regexpr, args)
 }
 
 
 chr2fct <- function(x) {
-   if (is.data.frame(x)) {
-      x[1:ncol(x)] <- lapply(x, chr2fct_)
-   } else if (is.list(x)) {
-      x <- lapply(x, chr2fct_)
-   } else {
-      x <- chr2fct_(x)
-   }
-   x
+  if (is.data.frame(x)) {
+    x[1:ncol(x)] <- lapply(x, chr2fct_)
+  } else if (is.list(x)) {
+    x <- lapply(x, chr2fct_)
+  } else {
+    x <- chr2fct_(x)
+  }
+  x
 }
 
 chr2fct_ <- function(x) if (is.factor(x)) as.character(x) else x

@@ -19,47 +19,55 @@
 #'
 #' @export
 
+incVer <- function(pkg, folder = ".", increase = "dev") {
+  ## Read DESCRIPTION
+  ### If Built is kept, package built does not work. If a vector with column names is
+  ### provided to avoid reading twice, there is a risk to overlook info saved in
+  ### DESCRIPTION
+  dcf_colnames <- colnames(read.dcf(
+    file = system.file("DESCRIPTION", package = pkg)
+  ))
+  dcf_colnames <- dcf_colnames[dcf_colnames != "Built"]
+  f <- read.dcf(
+    file = system.file("DESCRIPTION", package = pkg),
+    fields = dcf_colnames
+  )
 
-incVer <- function(pkg, folder=".", increase="dev"){
-   ## Read DESCRIPTION
-   ### If Built is kept, package built does not work. If a vector with column names is
-   ### provided to avoid reading twice, there is a risk to overlook info saved in
-   ### DESCRIPTION
-   dcf_colnames <- colnames(read.dcf(file=system.file("DESCRIPTION", package=pkg)))
-   dcf_colnames <- dcf_colnames[dcf_colnames != "Built"]
-   f <- read.dcf(file=system.file("DESCRIPTION", package=pkg),
-                 fields=dcf_colnames)
+  ## Increment version number
+  curVer <- package_version(f[4])
+  if (increase == "dev") {
+    curVer[[1, 4]] <- ifelse(
+      is.na(curVer[[1, 4]]) | curVer[[1, 4]] == 0,
+      9001,
+      curVer[[1, 4]] + 1
+    )
+  } else if (increase == "patch") {
+    curVer[[1, 3]] <- ifelse(is.na(curVer$patchlevel), 1, curVer$patchlevel + 1)
+    curVer[[1, 4]] <- 0
+  } else if (increase == "minor") {
+    curVer[[1, 2]] <- ifelse(is.na(curVer$minor), 1, curVer$minor + 1)
+    curVer[[1, 3]] <- 0
+    curVer[[1, 4]] <- 0
+  } else if (increase == "major") {
+    curVer[[1, 1]] <- ifelse(is.na(curVer$major), 1, curVer$major + 1)
+    curVer[[1, 2]] <- 0
+    curVer[[1, 3]] <- 0
+    curVer[[1, 4]] <- 0
+  } else {
+    stop(paste("Can not identify the increase argument: ", increase))
+  }
 
-   ## Increment version number
-   curVer <- package_version(f[4])
-   if(increase == "dev") {
-      curVer[[1,4]] <- ifelse(is.na(curVer[[1,4]]) | curVer[[1,4]] == 0, 9001, curVer[[1,4]] + 1)
-   } else if (increase == "patch") {
-      curVer[[1,3]] <- ifelse(is.na(curVer$patchlevel), 1, curVer$patchlevel + 1)
-      curVer[[1,4]] <- 0
-   } else if (increase == "minor") {
-      curVer[[1,2]] <- ifelse(is.na(curVer$minor), 1, curVer$minor + 1)
-      curVer[[1,3]] <- 0
-      curVer[[1,4]] <- 0
-   } else if (increase == "major") {
-      curVer[[1,1]] <- ifelse(is.na(curVer$major), 1, curVer$major + 1)
-      curVer[[1,2]] <- 0
-      curVer[[1,3]] <- 0
-      curVer[[1,4]] <- 0
-   } else {
-      stop(paste("Can not identify the increase argument: " , increase))
-   }
+  f[4] <- toString(curVer)
 
-   f[4] <- toString(curVer)
+  ## Update also the date
+  f[5] <- format(Sys.time(), "%Y-%m-%d")
 
-   ## Update also the date
-   f[5] <- format (Sys.time(), "%Y-%m-%d")
+  ## Save
+  write.dcf(f, file = paste(folder, "DESCRIPTION", sep = "/"))
 
-   ## Save
-   write.dcf(f, file=paste(folder, "DESCRIPTION", sep="/"))
-
-   if(increase == 'major' | increase == 'minor' | increase == 'patch') print(
+  if (increase == 'major' | increase == 'minor' | increase == 'patch') {
+    print(
       "Consider updating README.md and NEWS.md."
-   )
-
+    )
+  }
 }

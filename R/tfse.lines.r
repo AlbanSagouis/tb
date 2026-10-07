@@ -16,14 +16,14 @@
 #' @export
 #'
 readlines <- function(x, ...) {
-   dots <- list(...)
-   dots <- add_arg_if(dots, encoding = "UTF-8", skipNul = TRUE, warn = FALSE)
-   if (is_url(x)) {
-      con <- url(x, encoding = dots$encoding)
-   } else {
-      con <- file(x, encoding = dots$encoding)
-   }
-   on.exit(close(con))
-   dots$con <- con
-   do.call("readLines", dots)
+  dots <- list(...)
+  dots <- add_arg_if(dots, encoding = "UTF-8", skipNul = TRUE, warn = FALSE)
+  if (is_url(x)) {
+    con <- url(x, encoding = dots$encoding)
+  } else {
+    con <- file(x, encoding = dots$encoding)
+  }
+  on.exit(close(con))
+  dots$con <- con
+  do.call("readLines", dots)
 }

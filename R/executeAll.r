@@ -15,8 +15,8 @@
 #' @export
 
 executeOne <- function(fullPath = NULL, echo = FALSE, local = TRUE) {
-   source(fullPath, encoding = 'UTF-8', echo = echo, local = local)
-   # sys.source(fullPath, envir = new.env(), chdir = FALSE, keep.source = FALSE, keep.parse.data = FALSE, toplevel.env = topenv())
+  source(fullPath, encoding = 'UTF-8', echo = echo, local = local)
+  # sys.source(fullPath, envir = new.env(), chdir = FALSE, keep.source = FALSE, keep.parse.data = FALSE, toplevel.env = topenv())
 }
 
 #' Execute all scripts inside a folder
@@ -38,8 +38,18 @@ executeOne <- function(fullPath = NULL, echo = FALSE, local = TRUE) {
 #'
 #' @export
 
-executeAll <- function(fullPath = NULL, echo = FALSE, local = TRUE, recursive = FALSE) {
-   listF <- list.files(fullPath, pattern = ".R|.r", full.names = TRUE, recursive = recursive)
-   lapply(listF, executeOne, echo = echo, local = local)
-   return(listF)
+executeAll <- function(
+  fullPath = NULL,
+  echo = FALSE,
+  local = TRUE,
+  recursive = FALSE
+) {
+  listF <- list.files(
+    fullPath,
+    pattern = ".R|.r",
+    full.names = TRUE,
+    recursive = recursive
+  )
+  lapply(listF, executeOne, echo = echo, local = local)
+  return(listF)
 }

@@ -22,31 +22,48 @@
 #' @author Alban Sagouis
 #' @export
 
-gsubInOneScript <- function(fullPath, pattern, replacement, newPath = NULL, userCheck = TRUE, ignore.case = FALSE) {
-   sourceF <- file(fullPath, open = "r+b")
-   lines <- readLines(sourceF)
-   matches <- sapply(lines, grepl, pattern = pattern)
+gsubInOneScript <- function(
+  fullPath,
+  pattern,
+  replacement,
+  newPath = NULL,
+  userCheck = TRUE,
+  ignore.case = FALSE
+) {
+  sourceF <- file(fullPath, open = "r+b")
+  lines <- readLines(sourceF)
+  matches <- sapply(lines, grepl, pattern = pattern)
 
-   if(userCheck) {
-      search_these_files(pattern, fullPath, ignore.case = ignore.case)
-      answer <- utils::askYesNo(paste0('Do you want to replace matches of "', pattern, '" with "', replacement, '"?'))
-      if(is.na(answer)) stop
-      if(answer) {
-         for(i in which(matches)) {
-            lines[i] <- gsub(lines[i], pattern = pattern, replacement = replacement)
-         }
+  if (userCheck) {
+    search_these_files(pattern, fullPath, ignore.case = ignore.case)
+    answer <- utils::askYesNo(paste0(
+      'Do you want to replace matches of "',
+      pattern,
+      '" with "',
+      replacement,
+      '"?'
+    ))
+    if (is.na(answer)) {
+      stop
+    }
+    if (answer) {
+      for (i in which(matches)) {
+        lines[i] <- gsub(lines[i], pattern = pattern, replacement = replacement)
       }
-   } else {
-      for( i in which(matches) ) {
-         lines[i] <- gsub(lines[i], pattern = pattern, replacement = replacement)
-      }
-   }
+    }
+  } else {
+    for (i in which(matches)) {
+      lines[i] <- gsub(lines[i], pattern = pattern, replacement = replacement)
+    }
+  }
 
-   if( !is.null(newPath) ) sourceF <- file(newPath, open = "w")
+  if (!is.null(newPath)) {
+    sourceF <- file(newPath, open = "w")
+  }
 
-   writeLines(text = lines, con = sourceF)  #, sep = "\n"
-   close(sourceF)  # closing connection
-   return(sum(matches))
+  writeLines(text = lines, con = sourceF) #, sep = "\n"
+  close(sourceF) # closing connection
+  return(sum(matches))
 }
 
 
@@ -74,18 +91,44 @@ gsubInOneScript <- function(fullPath, pattern, replacement, newPath = NULL, user
 #' @author Alban Sagouis
 #' @export
 
-gsubInOneFolder <- function(fullPath, pattern, replacement, recursive = FALSE, newPath = NULL, userCheck = TRUE, ignore.case = FALSE) {
-   assertthat::see_if(dir.exists(fullPath))
-   assertthat::see_if(assertthat::is.writeable(fullPath))
+gsubInOneFolder <- function(
+  fullPath,
+  pattern,
+  replacement,
+  recursive = FALSE,
+  newPath = NULL,
+  userCheck = TRUE,
+  ignore.case = FALSE
+) {
+  assertthat::see_if(dir.exists(fullPath))
+  assertthat::see_if(assertthat::is.writeable(fullPath))
 
-   listF <- list.files(fullPath, pattern = "\\.R$|\\.r$", full.names = TRUE, recursive = recursive)
-   if(userCheck) {
-      search_these_files(pattern, listF, ignore.case = ignore.case)
-      answer <- utils::askYesNo(paste0('Do you want to replace matches of "', pattern, '" with "', replacement, '"?'))
-      if(is.na(answer) || !answer) stop
-   }
+  listF <- list.files(
+    fullPath,
+    pattern = "\\.R$|\\.r$",
+    full.names = TRUE,
+    recursive = recursive
+  )
+  if (userCheck) {
+    search_these_files(pattern, listF, ignore.case = ignore.case)
+    answer <- utils::askYesNo(paste0(
+      'Do you want to replace matches of "',
+      pattern,
+      '" with "',
+      replacement,
+      '"?'
+    ))
+    if (is.na(answer) || !answer) stop
+  }
 
-   nmatches <- sapply(listF, gsubInOneScript, pattern, replacement, newPath, userCheck = FALSE)
+  nmatches <- sapply(
+    listF,
+    gsubInOneScript,
+    pattern,
+    replacement,
+    newPath,
+    userCheck = FALSE
+  )
 
-   return( data.frame( nmatches[nmatches > 0] ) )
+  return(data.frame(nmatches[nmatches > 0]))
 }

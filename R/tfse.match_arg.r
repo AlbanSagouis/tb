@@ -15,49 +15,62 @@
 #' @return Value(s) matched via partial matching.
 #' @author Michael Wayne Kearney
 #' @export
-match_arg <- function(arg, choices,
-                      multiple = FALSE,
-                      ignore_case = TRUE,
-                      trim_ws = TRUE) {
-   if (missing(choices)) {
-      formal.args <- formals(sys.function(sysP <- sys.parent()))
-      choices <- eval(formal.args[[as.character(substitute(arg))]],
-                      envir = sys.frame(sysP))
-   }
-   if (is.null(arg))
-      return(choices[1L])
-   else if (!is.character(arg))
-      stop("'arg' must be NULL or a character vector")
-   if (!multiple) {
-      if (identical(arg, choices))
-         return(arg[1L])
-      if (length(arg) > 1L)
-         stop("'arg' must be of length 1")
-   }
-   else if (length(arg) == 0L)
-      stop("'arg' must be of length >= 1")
-   if (trim_ws) {
-      arg <- trim_ws(arg)
-   }
-   if (ignore_case) {
-      arg <- tolower(arg)
-      choices_ <- choices
-      choices <- tolower(choices)
-   }
-   i <- pmatch(arg, choices, nomatch = 0L, duplicates.ok = TRUE)
-   if (all(i == 0L))
-      stop(gettextf("'arg' should be one of %s",
-                    paste(dQuote(choices), collapse = ", ")),
-           domain = NA)
-   i <- i[i > 0L]
-   if (!multiple && length(i) > 1)
-      stop("there is more than one match in 'match.arg'")
-   if (ignore_case) {
-      choices <- choices_
-   }
-   choices[i]
+match_arg <- function(
+  arg,
+  choices,
+  multiple = FALSE,
+  ignore_case = TRUE,
+  trim_ws = TRUE
+) {
+  if (missing(choices)) {
+    formal.args <- formals(sys.function(sysP <- sys.parent()))
+    choices <- eval(
+      formal.args[[as.character(substitute(arg))]],
+      envir = sys.frame(sysP)
+    )
+  }
+  if (is.null(arg)) {
+    return(choices[1L])
+  } else if (!is.character(arg)) {
+    stop("'arg' must be NULL or a character vector")
+  }
+  if (!multiple) {
+    if (identical(arg, choices)) {
+      return(arg[1L])
+    }
+    if (length(arg) > 1L) {
+      stop("'arg' must be of length 1")
+    }
+  } else if (length(arg) == 0L) {
+    stop("'arg' must be of length >= 1")
+  }
+  if (trim_ws) {
+    arg <- trim_ws(arg)
+  }
+  if (ignore_case) {
+    arg <- tolower(arg)
+    choices_ <- choices
+    choices <- tolower(choices)
+  }
+  i <- pmatch(arg, choices, nomatch = 0L, duplicates.ok = TRUE)
+  if (all(i == 0L)) {
+    stop(
+      gettextf(
+        "'arg' should be one of %s",
+        paste(dQuote(choices), collapse = ", ")
+      ),
+      domain = NA
+    )
+  }
+  i <- i[i > 0L]
+  if (!multiple && length(i) > 1) {
+    stop("there is more than one match in 'match.arg'")
+  }
+  if (ignore_case) {
+    choices <- choices_
+  }
+  choices[i]
 }
-
 
 
 #' Add defaults to argument list
@@ -84,16 +97,22 @@ match_arg <- function(arg, choices,
 #'
 #' @export
 add_arg_if <- function(args, ..., override = FALSE) {
-   dots <- list(...)
-   if (length(dots) == 0) return(args)
-   if (length(args) == 0) return(dots)
-   ## if already specified, don't update that arg
-   if (!override) {
-      dots <- dots[!names(dots) %in% names(args)]
-   }
-   if (length(dots) == 0) return(args)
-   for (i in names(dots)) {
-      args[[i]] <- dots[[i]]
-   }
-   args
+  dots <- list(...)
+  if (length(dots) == 0) {
+    return(args)
+  }
+  if (length(args) == 0) {
+    return(dots)
+  }
+  ## if already specified, don't update that arg
+  if (!override) {
+    dots <- dots[!names(dots) %in% names(args)]
+  }
+  if (length(dots) == 0) {
+    return(args)
+  }
+  for (i in names(dots)) {
+    args[[i]] <- dots[[i]]
+  }
+  args
 }
