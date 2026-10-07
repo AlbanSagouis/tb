@@ -149,7 +149,7 @@ regexpr_ <- function(x, pat, ...) {
 
 chr2fct <- function(x) {
   if (is.data.frame(x)) {
-    x[1:ncol(x)] <- lapply(x, chr2fct_)
+    x[seq_len(ncol(x))] <- lapply(x, chr2fct_)
   } else if (is.list(x)) {
     x <- lapply(x, chr2fct_)
   } else {
